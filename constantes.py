@@ -1,0 +1,8 @@
+ALTURA = 1280
+LARGURA = 720
+
+UA = 149597870700
+escalax = 1280 / UA
+escalay = 720 / UA
+
+M_TERRA = 5.972e24
