@@ -4,6 +4,7 @@ import pygame
 import os
 import math 
 from constantes import *
+from funcoes import *
 
 pygame.init()
 
@@ -17,11 +18,12 @@ pygame.display.set_caption("Planet System Simulator")
 class Planeta(pygame.sprite.Sprite):
     def __init__(self, massa, raio, posicao, nome):
         #constantes do planeta
+        self.nome = nome
         self.massa = massa
         self.raio = raio
         self.volume = (4 / 3) * math.pi * self.raio ** 3
         self.densidade = self.massa / self.volume
-
+        
         #adicionando animação - perceba que eu tenho apenas uma sprite sheet, o loop percorre essa imagem e pega cada uma imagem...
         #a partir do seu tamanho e posição com pixels.
         pygame.sprite.Sprite.__init__(self)
@@ -34,7 +36,7 @@ class Planeta(pygame.sprite.Sprite):
         self.lista_imagens = []
         for i in range(50):
             img = self.sprite_sheet.subsurface((altura_spritesheet * i, 0), (altura_spritesheet, altura_spritesheet))
-            
+
             #aumenta a imagem
             img = pygame.transform.scale(img, (altura_spritesheet * 5, altura_spritesheet * 5))
             self.lista_imagens.append(img)
@@ -50,13 +52,38 @@ class Planeta(pygame.sprite.Sprite):
         if self.index_lista == 49:
             self.index_lista = 0
 
-    #def move():
+    def move(self, grupo, index):
         #precisamos considerar a interação de cada corpo com outro
+        arx = 0
+        ary = 0
+        for i in range(len(grupo)):
+            if i == index:
+                continue
+            
+            #declarando a componente de aceleração causada por essa interção.
+            #para saber mais dessa função, vide o arquivo de funções.
+            a = força_gravitacional(self, grupo[i])
 
-terra = Planeta(1000, 30, (320, 360), 'Terra')
-sol = Planeta(2000, 100, (960, 360), 'Sol')
+            ax = a[0]
+            ay = a[1]
 
-pygame.sprite.Group.add
+            arx += ax
+            ary += ay
+
+            dt = 1 / FPS
+
+            dx = int((1 / 2) * ax * dt ** 2)
+            dy = int((1 / 2) * ay * dt ** 2)
+
+            self.rect.center = (self.rect.center[0] + dx, self.rect.center[1] + dy)
+
+terra = Planeta(1e5, 30, (320, 180), 'Terra')
+sol = Planeta(1e5, 100, (960, 360), 'Sol')
+
+planetas = pygame.sprite.Group()
+
+planetas.add(terra)
+planetas.add(sol)
 
 clock = pygame.time.Clock()
 FPS = 30
@@ -75,8 +102,12 @@ while game:
     #pinta o fundo com uma cor que sugere o universo
     window.fill((10, 10, 35))
 
-    terra.update()
-    sol.update()
+    #move os planetas:
+    lista_planetas = planetas.sprites()
+    for i in range(len(lista_planetas)):
+        lista_planetas[i].move(lista_planetas, i)
+
+    planetas.update()
 
     window.blit(terra.image, terra.rect)
     window.blit(sol.image, sol.rect)

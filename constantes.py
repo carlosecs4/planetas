@@ -6,3 +6,5 @@ escalax = 1280 / UA
 escalay = 720 / UA
 
 M_TERRA = 5.972e24
+
+G = 10000
